@@ -1,0 +1,35 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: netrec
+      POSTGRES_USER: netrec
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U netrec -d netrec"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: ${SECRET_KEY:?set SECRET_KEY in .env}
+      DATABASE_URL: postgresql+psycopg2://netrec:${DB_PASSWORD}@db:5432/netrec
+      NVD_API_KEY: ${NVD_API_KEY:-}
+      COOKIE_SECURE: ${COOKIE_SECURE:-0}
+    ports:
+      - "127.0.0.1:8000:8000"   # localhost only. Do NOT expose a scanner to your LAN/internet.
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+
+volumes:
+  pgdata:

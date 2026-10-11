@@ -1,0 +1,11 @@
+# Join an external lab network so NetRec can reach containers on it (e.g. Metasploitable):
+#   docker network create netrec-lab
+#   docker network connect netrec-lab <target-container>
+#   docker compose -f docker-compose.yml -f docker-compose.lab.yml up -d
+services:
+  web:
+    networks: [default, lab]
+networks:
+  lab:
+    external: true
+    name: netrec-lab

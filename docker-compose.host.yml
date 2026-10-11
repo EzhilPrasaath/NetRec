@@ -1,0 +1,12 @@
+# Linux only. Use for accurate LAN discovery (ARP/MAC addresses):
+#   docker compose -f docker-compose.yml -f docker-compose.host.yml up -d --build
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+  web:
+    network_mode: host
+    ports: !reset []
+    environment:
+      BIND: 127.0.0.1:8000
+      DATABASE_URL: postgresql+psycopg2://netrec:${DB_PASSWORD}@127.0.0.1:5432/netrec
